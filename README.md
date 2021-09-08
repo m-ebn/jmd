@@ -12,7 +12,7 @@ When writing documentation, often multiple Markdown files are required to produc
 The script can be called by using
 
 ```bash
-python3 join_md.py [options]
+python3 jmd.py [options]
 ```
 
 Options are:
@@ -21,17 +21,19 @@ Options are:
 - `--output`: Output directory/filename. This shall also include the extension `.md`. Example: `doc/documentation.md`. (default: `./document.md`)
 - `--base_dir`: Base directory, the tool shall look for Markdown files. (default: `.`)
 - `--include_title`: Include meta data title as first level title (#). (default: `False`)
-- `--header_offset`: Add an additional `#` to titles in order to manipulate final file structure. (default: `False`)
+
+<!-- - `--header_offset`: Add an additional `#` to titles in order to manipulate final file structure. (default: `False`)
 - `--meta_data_path`: Reference a file, where metadata in yml format shall be included from. (default: 'none')
 - `--reduce_infile_references`: Reduce file references that are now merged. (default: `False`) **Still needs Work! What if references a file that is not included?**
 - `--pandoc_references`: Output Markdown file with Pandoc ready in file references. (default: `False`)
 - `--set_default_true`: Set all default false to default true to have a cleaner cmd command. (default: `False`)
-- `--detect_html_tex_tags`: Detect LaTeX commands nested in html tags (default: `False`)
+- `--detect_html_tex_tags`: Detect LaTeX commands nested in html tags (default: `False`) -->
 
 ## Conventions
 
 - `parsed_document_position: 0` is reserved for meta data.
 
+<!--
 ## Detecting HTML Tags for LaTeX
 
 Sometimes, Sepcial Markdown files are important!
@@ -61,3 +63,4 @@ Setting latex environments in a markdown file, basically breaks all Markdown cod
 \let\Begin\begin
 \let\End\end
 ```
+-->
