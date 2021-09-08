@@ -32,6 +32,7 @@ Options are:
 ## Conventions
 
 - `parsed_document_position: 0` is reserved for meta data.
+- In wiki tools, the `#` is used for the main title. So in order for a structured text, the highest title level shall be `##`.
 
 <!--
 ## Detecting HTML Tags for LaTeX

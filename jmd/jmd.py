@@ -2,34 +2,15 @@
 
 import frontmatter
 import os
-import sys
-import getopt
 import re
 import argparse
 
 
 class jmd_patterns():
+    # Collection of Python3 regex commands for text manipulation
 
     pattern_titles = '(#{1,6}) '
     sub_titles = '#\g<1> '
-
-    pattern_refs = '\[(.*)\]\((?!https)(.*).md#(.*)\)'
-    sub_refs = '[\g<1>](#\g<3>)'
-    sub_refs_pandoc = '\g<1> \\ref{\g<3>}'
-
-    pattern_tex_begin = '\<p tex\-begin=\"(.*)\"/\>'
-    sub_tex_begin = '\\\\Begin{\g<1>}'
-
-    pattern_tex_command = '\<p tex\-command=\"(.*)\"\/\>'
-    sub_tex_command = '\g<1>'
-
-    pattern_tex_end = '\<p tex\-end=\"(.*)\"/\>'
-    sub_tex_end = '\\\\End{\g<1>}'
-
-    pattern_path = '\.\.\/'
-    pattern_begin_image_path = '\!\[(.*)\]\('
-    sub_path = '../'
-    sub_begin_image_path = '![\g<1>]('
 
 
 class jmd():
@@ -46,13 +27,16 @@ class jmd():
         self.pandoc_references = False
         self.detect_html_tex_tags = False
 
+        # Patterns
+        self.patterns = jmd_patterns
+
         # Fil contents
         # 1: index
         # 2: content
         # 3: title
         self.fileContentList = []
 
-    def gather_documents(self):
+    def gatherDocuments(self):
         for root, dirs, files in os.walk(self.base_dir, topdown=False):
             for file in files:
 
@@ -95,15 +79,20 @@ class jmd():
     def applyOptions(self):
         if self.include_title == True:
             self.includeTitle()
+        if self.header_offset == True:
+            self.headerOffset()
 
     def includeTitle(self):
         for element in self.fileContentList:
             element[1] = '\n\n' + element[1]
             element[2] = '# ' + element[2]
 
-    def headerOfset(self):
-        # To be implemented in the future
-        pass
+    def headerOffset(self):
+        for element in self.fileContentList:
+            element[1] = re.sub(self.patterns.pattern_titles,
+                                self.patterns.sub_titles, element[1])
+            element[2] = re.sub(self.patterns.pattern_titles,
+                                self.patterns.sub_titles, element[2])
 
     def addHeader(self):
         # To be implemented in the future
@@ -113,7 +102,7 @@ class jmd():
         # To be implemented in the future
         pass
 
-    def get_text(self):
+    def getText(self):
         self.fileContentList = sorted(
             self.fileContentList, key=lambda x:  x[0])
 
@@ -132,7 +121,7 @@ class jmd():
 
         return textList
 
-    def write_text(self, output):
+    def writeText(self, output):
 
         path, file = os.path.split(self.output_path)
 
@@ -169,11 +158,11 @@ class jmd():
         # parser.add_argument('-m', '--meta_data_path', default='',
         #                    help='Reference a file, where metadata in yml format shall be included from.')
 
-        # parser.add_argument('-i', '--include_title', type=bool, default=False,
-        #                    help='Include meta data title as first level title (#).')
+        parser.add_argument('-i', '--include_title', type=bool, default=False,
+                            help='Include meta data title as first level title (#).')
 
-        # parser.add_argument('-j', '--header_offset', type=bool, default=False,
-        #                    help='Add an additional `#` to titles in order to manipulate final file structure.')
+        parser.add_argument('-h', '--header_offset', type=bool, default=False,
+                            help='Add an additional `#` to titles in order to manipulate final file structure.')
 
         # parser.add_argument('-r', '--reduce_infile_references', type=bool, default=False,
         #                    help='Reduce file references that are now merged.')
@@ -212,10 +201,12 @@ if __name__ == '__main__':
 
     document = jmd()
 
-    document.get_cmd_args()
+    document.getCmdArgs()
 
-    document.get_text()
+    document.gatherDocuments()
 
-    text = document.get_text()
+    document.applyOptions()
 
-    document.write_write(text)
+    text = document.getText()
+
+    document.writeText(text)
