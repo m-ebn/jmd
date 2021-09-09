@@ -1,3 +1,5 @@
+<img src="doc/jmd_logo.svg" align="center" height="110"/>
+
 ## Motivation
 
 When writing documentation, often multiple Markdown files are required to produce for example a wiki page or similar. Producing a pdf out of multiple files is not straight forward and can take a considerable ammount of scripting. This tool aims to reduce the workload required to produce on Markdown file out of multiple files by extending `yml` metadata by two new entries:
