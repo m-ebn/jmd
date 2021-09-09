@@ -1,4 +1,4 @@
-<p style="text-align: center;">
+<p align="center">
     <img src="doc/jmd_logo.svg" height="120" alt="Project Logo" />
     <br>
     <b>Join Markdown (JMD)</b>
