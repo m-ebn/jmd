@@ -6,11 +6,82 @@ import re
 import argparse
 
 
-class jmd_patterns():
+def splitPath(path):
+    return path.split("/")
+
+
+def includeTitle(element):
+    element[1] = '\n\n' + element[1]
+    element[2] = '# ' + element[2]
+
+
+def headerOffset(element):
+    element[1] = re.sub(JmdPatterns.pattern_titles,
+                        JmdPatterns.sub_titles, element[1])
+    element[2] = re.sub(JmdPatterns.pattern_titles,
+                        JmdPatterns.sub_titles, element[2])
+
+
+def addHeader(element):
+    # To be implemented in the future
+    pass
+
+
+def addFooter(element):
+    # To be implemented in the future
+    pass
+
+
+def updateImageLinks(element, base_dir, outputPath, jmdFile):
+    # Get variable without filename for further filepath processing
+    outputPathHead = os.path.split(os.path.join(jmdFile, outputPath))[0]
+    # Find all image references in a file
+    imageUrlList = re.findall(
+        JmdPatterns.pattern_image_path, element[1])
+    # Get new file reference and update the old one
+    for image in imageUrlList:
+        # Create a normalized, relative path between the image and path of the output file
+        normalizedImagePath = os.path.normpath(
+            os.path.join(jmdFile, base_dir, image[1]))
+        fixedOutputPath = os.path.relpath(
+            normalizedImagePath, outputPathHead)
+        # Replace the original url with the newly generated url
+        element[1] = re.sub(JmdPatterns.pattern_begin_image_path
+                            + image[0]
+                            + JmdPatterns.pattern_center_image_path
+                            + image[1]
+                            + JmdPatterns.pattern_end_image_path,
+                            JmdPatterns.sub_begin_image_path
+                            + image[0]
+                            + JmdPatterns.sub_center_image_path
+                            + fixedOutputPath
+                            + JmdPatterns.sub_end_image_path,
+                            element[1])
+
+# https://stackoverflow.com/questions/8170982/strip-string-after-third-occurrence-of-character-python
+# def truncStringAt(s, d, n=1):
+#     "Returns s truncated at the n'th (3rd by default) occurrence of the delimiter, d."
+#     return d.join(s.split(d, n)[:n])
+
+
+class JmdPatterns():
     # Collection of Python3 regex commands for text manipulation
 
     pattern_titles = '(#{1,6}) '
     sub_titles = '#\g<1> '
+
+    # Detect Markdown style image
+    pattern_image_path = '\!\[(.*)\]\((.*)\)'
+    pattern_begin_image_path = '\!\['
+    pattern_center_image_path = '\]\('
+    pattern_end_image_path = '\)'
+    sub_begin_image_path = '!['
+    sub_center_image_path = ']('
+    sub_end_image_path = ')'
+
+    # cmd path pattern
+    pattern_path = '\.\.\/'
+    sub_path = '../'
 
 
 class jmd():
@@ -19,7 +90,7 @@ class jmd():
         # default values
         self.document_id = "doc"
         self.base_dir = "."
-        self.output_path = "document.md"
+        self.outputPath = "document.md"
         self.meta_data_path = ""
         self.include_title = False
         self.header_offset = False
@@ -28,12 +99,13 @@ class jmd():
         self.detect_html_tex_tags = False
 
         # Patterns
-        self.patterns = jmd_patterns
+        self.patterns = JmdPatterns
 
         # Fil contents
-        # 1: index
-        # 2: content
-        # 3: title
+        # 0: index
+        # 1: content
+        # 2: title
+        # 3: original file path
         self.fileContentList = []
 
     def gatherDocuments(self):
@@ -41,6 +113,7 @@ class jmd():
             for file in files:
 
                 if file.endswith(".md") and file != os.path.basename(self.meta_data_path):
+                    filePath = self.base_dir + '/' + file
                     try:
                         file_content = frontmatter.load(
                             os.path.join(root, file))
@@ -68,41 +141,26 @@ class jmd():
                             # Append content to fileContentList
                             try:
                                 self.fileContentList.append(
-                                    [int(positions[index]), content, title])
+                                    [int(positions[index]), content, title, filePath])
                             except:
                                 self.fileContentList.append(
-                                    [int(positions), content, title])
+                                    [int(positions), content, title, filePath])
 
                     except:
                         print('ERROR')
 
     def applyOptions(self):
-        if self.include_title == True:
-            self.includeTitle()
-        if self.header_offset == True:
-            self.headerOffset()
-
-    def includeTitle(self):
+        # Go over all detected files
         for element in self.fileContentList:
-            element[1] = '\n\n' + element[1]
-            element[2] = '# ' + element[2]
-
-    def headerOffset(self):
-        for element in self.fileContentList:
-            element[1] = re.sub(self.patterns.pattern_titles,
-                                self.patterns.sub_titles, element[1])
-            element[2] = re.sub(self.patterns.pattern_titles,
-                                self.patterns.sub_titles, element[2])
-
-    def addHeader(self):
-        # To be implemented in the future
-        pass
-
-    def addFooter(self):
-        # To be implemented in the future
-        pass
+            element = updateImageLinks(
+                element, self.base_dir, self.outputPath, __file__)
+            if self.include_title == True:
+                element = includeTitle(element)
+            if self.header_offset == True:
+                element = headerOffset(element)
 
     def getText(self):
+        print(self.fileContentList)
         self.fileContentList = sorted(
             self.fileContentList, key=lambda x:  x[0])
 
@@ -119,11 +177,12 @@ class jmd():
 
             textList = textList + textElement + '\n\n'
 
+        print(textList)
         return textList
 
     def writeText(self, output):
 
-        path, file = os.path.split(self.output_path)
+        path, file = os.path.split(self.outputPath)
 
         try:
             os.makedirs(path)
@@ -131,7 +190,7 @@ class jmd():
             print("existing directory.")
 
         try:
-            f = open(self.output_path, "x")
+            f = open(self.outputPath, "x")
 
             f.write(output)
 
@@ -141,6 +200,9 @@ class jmd():
                   " was successfully created at " + path + ".")
         except:
             print("Filename already taken.")
+
+        print("File goin to: ")
+        print(str(file))
 
     def get_cmd_args(self):
         parser = argparse.ArgumentParser(description='Process some integers.')
@@ -179,7 +241,7 @@ class jmd():
         args_list = parser.parse_args()
 
         self.document_id = args_list.document_id
-        self.output_path = args_list.output
+        self.outputPath = args_list.output
         self.base_dir = args_list.base_dir
         # To be implemented later!
         # self.meta_data_path = args_list.meta_data_path
@@ -199,14 +261,57 @@ class jmd():
 
 if __name__ == '__main__':
 
-    document = jmd()
+    # document = jmd()
 
-    document.getCmdArgs()
+    # document.getCmdArgs()
 
-    document.gatherDocuments()
+    # document.gatherDocuments()
 
-    document.applyOptions()
+    # document.applyOptions()
 
-    text = document.getText()
+    # text = document.getText()
 
-    document.writeText(text)
+    # document.writeText(text)
+    document2 = jmd()
+    document2.document_id = "images"
+    document2.base_dir = "test/testfiles"
+    document2.outputPath = "hui/testi/output.md"
+    document2.gatherDocuments()
+    document2.applyOptions()
+    text = document2.getText()
+    document2.writeText(text)
+
+
+# elementDepth = element[3].count('/') - element[3].count('./')
+    # depthDifference = elementDepth - outputFileDepth
+    # elementPathList = splitPath(element[3])
+    # print(outputPathList)
+    # print(elementPathList)
+    # dirtest = dircmp(self.outputPath, element[3])
+    # left = dirtest.subdirs
+    # print(depthDifference)
+    # if depthDifference < 0:
+    #     print("Difference smaller")
+    #     string = self.patterns.sub_begin_image_path
+    #     levels = depthDifference + 1
+    #     print(depthDifference)
+    #     if depthDifference < 2:
+    #         levels = levels + 1
+    #     for i in range(levels):
+    #         string = string + self.patterns.sub_path
+    #     element[2] = re.sub(
+    #         self.patterns.pattern_begin_image_path, string, element[2])
+    # elif depthDifference > 0:
+    #     print("Difference greater")
+    #     string = self.patterns.pattern_begin_image_path
+    #     print(depthDifference)
+    #     levels = depthDifference - 1
+    #     if depthDifference > 2:
+    #         print("Level Offset")
+    #         levels = levels + 1
+    #     for i in range(levels):
+    #         string = string + self.patterns.pattern_path
+    #     element[1] = re.sub(
+    #         string, self.patterns.sub_begin_image_path, element[1])
+
+    #     print(element[2])
