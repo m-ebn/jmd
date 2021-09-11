@@ -4,6 +4,7 @@ import frontmatter
 import os
 import re
 import argparse
+import numpy as np
 
 
 def splitPath(path):
@@ -57,11 +58,47 @@ def updateImageLinks(element, base_dir, outputPath, jmdFile):
                             + fixedOutputPath
                             + JmdPatterns.sub_end_image_path,
                             element[1])
+    return element
 
 # https://stackoverflow.com/questions/8170982/strip-string-after-third-occurrence-of-character-python
 # def truncStringAt(s, d, n=1):
 #     "Returns s truncated at the n'th (3rd by default) occurrence of the delimiter, d."
 #     return d.join(s.split(d, n)[:n])
+
+
+def updateFileReferences(element, base_dir, outputPath, jmdFile, includedFiles):
+    # Get variable without filename for further filepath processing
+    outputPathHead = os.path.split(os.path.join(jmdFile, outputPath))[0]
+    # Find all files references in a file
+    fileUrlList = re.findall(JmdPatterns.pattern_file_ref, element[1])
+    # Get new file reference and update the old one
+    for file in fileUrlList:
+        includeFilesNames = []
+        for includeFile in includedFiles:
+            includeFilesNames.append(os.path.split(includeFile)[1])
+        if file[2].split("#")[0] in includeFilesNames:
+            fixedOutputPath = '#' + file[2].split("#")[1]
+        else:
+            # Create a normalized, relative path between the image and path of the output file
+            normalizedImagePath = os.path.normpath(
+                os.path.join(jmdFile, base_dir, file[2]))
+            fixedOutputPath = os.path.relpath(
+                normalizedImagePath, outputPathHead)
+        # Replace the original url with the newly generated url
+        element[1] = re.sub(file[0]
+                            + JmdPatterns.pattern_file_ref_begin
+                            + file[1]
+                            + JmdPatterns.pattern_file_ref_center
+                            + file[2]
+                            + JmdPatterns.pattern_file_ref_end,
+                            file[0]
+                            + JmdPatterns.sub_file_ref_begin
+                            + file[1]
+                            + JmdPatterns.sub_file_ref_center
+                            + fixedOutputPath
+                            + JmdPatterns.sub_file_ref_end,
+                            element[1])
+    return element
 
 
 class JmdPatterns():
@@ -72,12 +109,25 @@ class JmdPatterns():
 
     # Detect Markdown style image
     pattern_image_path = '\!\[(.*)\]\((.*)\)'
+
     pattern_begin_image_path = '\!\['
     pattern_center_image_path = '\]\('
     pattern_end_image_path = '\)'
+
     sub_begin_image_path = '!['
     sub_center_image_path = ']('
     sub_end_image_path = ')'
+
+    # Detect file references
+    pattern_file_ref = '(\n| )\[(.*)\]\((?!https://)(.*)\)'
+
+    pattern_file_ref_begin = '\['
+    pattern_file_ref_center = '\]\((?!https://)'
+    pattern_file_ref_end = '\)'
+
+    sub_file_ref_begin = '['
+    sub_file_ref_center = ']('
+    sub_file_ref_end = ')'
 
     # cmd path pattern
     pattern_path = '\.\.\/'
@@ -106,6 +156,7 @@ class jmd():
         # 1: content
         # 2: title
         # 3: original file path
+        # 4: list of all references in file pointing to another local file
         self.fileContentList = []
 
     def gatherDocuments(self):
@@ -154,13 +205,15 @@ class jmd():
         for element in self.fileContentList:
             element = updateImageLinks(
                 element, self.base_dir, self.outputPath, __file__)
+            includedFilesList = np.array(self.fileContentList)[:, 3]
+            element = updateFileReferences(element, self.base_dir,
+                                           self.outputPath, __file__, includedFilesList)
             if self.include_title == True:
                 element = includeTitle(element)
             if self.header_offset == True:
                 element = headerOffset(element)
 
     def getText(self):
-        print(self.fileContentList)
         self.fileContentList = sorted(
             self.fileContentList, key=lambda x:  x[0])
 
@@ -177,7 +230,6 @@ class jmd():
 
             textList = textList + textElement + '\n\n'
 
-        print(textList)
         return textList
 
     def writeText(self, output):
