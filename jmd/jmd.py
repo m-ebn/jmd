@@ -15,12 +15,16 @@ def includeTitle(element):
     element[1] = '\n\n' + element[1]
     element[2] = '# ' + element[2]
 
+    return element
+
 
 def headerOffset(element):
     element[1] = re.sub(JmdPatterns.pattern_titles,
                         JmdPatterns.sub_titles, element[1])
     element[2] = re.sub(JmdPatterns.pattern_titles,
                         JmdPatterns.sub_titles, element[2])
+
+    return element
 
 
 def addHeader(element):
@@ -331,38 +335,3 @@ if __name__ == '__main__':
     document2.applyOptions()
     text = document2.getText()
     document2.writeText(text)
-
-
-# elementDepth = element[3].count('/') - element[3].count('./')
-    # depthDifference = elementDepth - outputFileDepth
-    # elementPathList = splitPath(element[3])
-    # print(outputPathList)
-    # print(elementPathList)
-    # dirtest = dircmp(self.outputPath, element[3])
-    # left = dirtest.subdirs
-    # print(depthDifference)
-    # if depthDifference < 0:
-    #     print("Difference smaller")
-    #     string = self.patterns.sub_begin_image_path
-    #     levels = depthDifference + 1
-    #     print(depthDifference)
-    #     if depthDifference < 2:
-    #         levels = levels + 1
-    #     for i in range(levels):
-    #         string = string + self.patterns.sub_path
-    #     element[2] = re.sub(
-    #         self.patterns.pattern_begin_image_path, string, element[2])
-    # elif depthDifference > 0:
-    #     print("Difference greater")
-    #     string = self.patterns.pattern_begin_image_path
-    #     print(depthDifference)
-    #     levels = depthDifference - 1
-    #     if depthDifference > 2:
-    #         print("Level Offset")
-    #         levels = levels + 1
-    #     for i in range(levels):
-    #         string = string + self.patterns.pattern_path
-    #     element[1] = re.sub(
-    #         string, self.patterns.sub_begin_image_path, element[1])
-
-    #     print(element[2])
