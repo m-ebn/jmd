@@ -12,4 +12,6 @@ setup(
                       're',
                       'argparse',
                       'numpy'],
+    extras_require={"test": ["python-frontmatter==1.0.0"]},
+    tests_require=["jmd[test]"],
 )
