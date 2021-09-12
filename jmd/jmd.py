@@ -104,34 +104,34 @@ def updateFileReferences(element, base_dir, outputPath, jmdFile, includedFiles):
 class JmdPatterns():
     # Collection of Python3 regex commands for text manipulation
 
-    pattern_titles = '(#{1,6}) '
-    sub_titles = '#\g<1> '
+    pattern_titles = r'(#{1,6}) '
+    sub_titles = r'#\g<1> '
 
     # Detect Markdown style image
-    pattern_image_path = '\!\[(.*)\]\((.*)\)'
+    pattern_image_path = r'\!\[(.*)\]\((.*)\)'
 
-    pattern_begin_image_path = '\!\['
-    pattern_center_image_path = '\]\('
-    pattern_end_image_path = '\)'
+    pattern_begin_image_path = r'\!\['
+    pattern_center_image_path = r'\]\('
+    pattern_end_image_path = r'\)'
 
-    sub_begin_image_path = '!['
-    sub_center_image_path = ']('
-    sub_end_image_path = ')'
+    sub_begin_image_path = r'!['
+    sub_center_image_path = r']('
+    sub_end_image_path = r')'
 
     # Detect file references
-    pattern_file_ref = '(^|\n| )\[(.*)\]\((?!https://)(.*)\)'
+    pattern_file_ref = r'(^|\n| )\[(.*)\]\((?!https://)(.*)\)'
 
-    pattern_file_ref_begin = '\['
-    pattern_file_ref_center = '\]\((?!https://)'
-    pattern_file_ref_end = '\)'
+    pattern_file_ref_begin = r'\['
+    pattern_file_ref_center = r'\]\((?!https://)'
+    pattern_file_ref_end = r'\)'
 
-    sub_file_ref_begin = '['
-    sub_file_ref_center = ']('
-    sub_file_ref_end = ')'
+    sub_file_ref_begin = r'['
+    sub_file_ref_center = r']('
+    sub_file_ref_end = r')'
 
     # cmd path pattern
-    pattern_path = '\.\.\/'
-    sub_path = '../'
+    pattern_path = r'\.\.\/'
+    sub_path = r'../'
 
 
 class jmd():
