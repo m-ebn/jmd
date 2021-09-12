@@ -7,10 +7,10 @@ setup(
     author_email='foomail@foo.com',
     packages=['jmd'],  # same as name
     # external packages as dependencies
-    install_requires=['python-frontmatter==1.0.0',
-                      'os',
+    install_requires=['os',
                       're',
                       'argparse',
+                      'python-frontmatter==1.0.0',
                       'numpy'],
     extras_require={"test": ["python-frontmatter==1.0.0"]},
     tests_require=["jmd[test]"],
