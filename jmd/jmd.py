@@ -119,7 +119,7 @@ class JmdPatterns():
     sub_end_image_path = ')'
 
     # Detect file references
-    pattern_file_ref = '(\n| )\[(.*)\]\((?!https://)(.*)\)'
+    pattern_file_ref = '(^|\n| )\[(.*)\]\((?!https://)(.*)\)'
 
     pattern_file_ref_begin = '\['
     pattern_file_ref_center = '\]\((?!https://)'
@@ -156,7 +156,6 @@ class jmd():
         # 1: content
         # 2: title
         # 3: original file path
-        # 4: list of all references in file pointing to another local file
         self.fileContentList = []
 
     def gatherDocuments(self):
