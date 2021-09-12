@@ -8,5 +8,5 @@ setup(
     author_email='foomail@foo.com',
     packages=['jmd'],  # same as name
     # external packages as dependencies
-    install_requires=['python-frontmatter'],
+    install_requires=['python-frontmatter', 'os', 're', 'argparse', 'numpy'],
 )
