@@ -38,6 +38,10 @@ def addFooter(element):
 
 
 def updateImageLinks(element, base_dir, outputPath, jmdFile):
+    print(element)
+    print(base_dir)
+    print(outputPath)
+    print(jmdFile)
     # Get variable without filename for further filepath processing
     outputPathHead = os.path.split(os.path.join(jmdFile, outputPath))[0]
     # Find all image references in a file
@@ -63,11 +67,6 @@ def updateImageLinks(element, base_dir, outputPath, jmdFile):
                             + JmdPatterns.sub_end_image_path,
                             element[1])
     return element
-
-# https://stackoverflow.com/questions/8170982/strip-string-after-third-occurrence-of-character-python
-# def truncStringAt(s, d, n=1):
-#     "Returns s truncated at the n'th (3rd by default) occurrence of the delimiter, d."
-#     return d.join(s.split(d, n)[:n])
 
 
 def updateFileReferences(element, base_dir, outputPath, jmdFile, includedFiles):
@@ -173,7 +172,10 @@ class jmd():
                             os.path.join(root, file))
 
                         content = file_content.content
-                        title = file_content['title']
+                        try:
+                            title = file_content['title']
+                        except:
+                            title = ""
 
                         try:
                             ids = file_content['parsed_document_id'].split(
@@ -202,6 +204,9 @@ class jmd():
 
                     except:
                         print('ERROR')
+        # Sort all entries based on the `parsed_documen_position`
+        self.fileContentList = sorted(
+            self.fileContentList, key=lambda x:  x[0])
 
     def applyOptions(self):
         # Go over all detected files
@@ -217,9 +222,6 @@ class jmd():
                 element = headerOffset(element)
 
     def getText(self):
-        self.fileContentList = sorted(
-            self.fileContentList, key=lambda x:  x[0])
-
         textList = ''
 
         for element in self.fileContentList:
@@ -259,7 +261,7 @@ class jmd():
         print("File goin to: ")
         print(str(file))
 
-    def get_cmd_args(self):
+    def getCmdArgs(self):
         parser = argparse.ArgumentParser(description='Process some integers.')
 
         parser.add_argument('-d', '--document_id', default='docs',
@@ -271,67 +273,29 @@ class jmd():
         parser.add_argument('-b', '--base_dir', default='.',
                             help='Base directory, the tool shall look for Markdown files.')
 
-        # To be implemented later!
-        # parser.add_argument('-m', '--meta_data_path', default='',
-        #                    help='Reference a file, where metadata in yml format shall be included from.')
-
         parser.add_argument('-i', '--include_title', type=bool, default=False,
                             help='Include meta data title as first level title (#).')
 
         parser.add_argument('-h', '--header_offset', type=bool, default=False,
                             help='Add an additional `#` to titles in order to manipulate final file structure.')
 
-        # parser.add_argument('-r', '--reduce_infile_references', type=bool, default=False,
-        #                    help='Reduce file references that are now merged.')
-
-        # parser.add_argument('-p', '--pandoc_references', type=bool, default=False,
-        #                    help='Output Markdown file with Pandoc ready in file references')
-
-        # parser.add_argument('-s', '--set_default_true', type=bool, default=False,
-        #                    help='Set all default false to default true to have a cleaner cmd command.')
-
-        # parser.add_argument('-t', '--detect_html_tex_tags', type=bool, default=False,
-        #                    help='Detect LaTeX commands nested in html tags')
-
         args_list = parser.parse_args()
 
         self.document_id = args_list.document_id
         self.outputPath = args_list.output
         self.base_dir = args_list.base_dir
-        # To be implemented later!
-        # self.meta_data_path = args_list.meta_data_path
-        # self.include_title = args_list.include_title
-        # self.header_offset = args_list.header_offset
-        # self.reduce_infile_references = args_list.reduce_infile_references
-        # self.pandoc_references = args_list.pandoc_references
-        # self.detect_html_tex_tags = args_list.detect_html_tex_tags
-
-        # if args_list.set_default_true == True:
-        #     self.include_title = True
-        #     self.header_offset = True
-        #     self.reduce_infile_references = True
-        #     self.pandoc_references = True
-        #     self.detect_html_tex_tags = True
 
 
 if __name__ == '__main__':
 
-    # document = jmd()
+    document = jmd()
 
-    # document.getCmdArgs()
+    document.getCmdArgs()
 
-    # document.gatherDocuments()
+    document.gatherDocuments()
 
-    # document.applyOptions()
+    document.applyOptions()
 
-    # text = document.getText()
+    text = document.getText()
 
-    # document.writeText(text)
-    document2 = jmd()
-    document2.document_id = "images"
-    document2.base_dir = "test/testfiles"
-    document2.outputPath = "hui/testi/output.md"
-    document2.gatherDocuments()
-    document2.applyOptions()
-    text = document2.getText()
-    document2.writeText(text)
+    document.writeText(text)
