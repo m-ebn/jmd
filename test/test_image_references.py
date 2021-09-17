@@ -26,3 +26,12 @@ def test_imageLinkSameFolder():
                                          "output/output.md",
                                          ".")[1]
     assert string1Result == "![Image](../image.png)", "Function retunred wrong link"
+
+
+def test_imageLinkSubfolders():
+    string = "![Image](../../img/image.png)"
+    string1Result = jmd.updateImageLinks([1, string, "", "doc/detail/file.md"],
+                                         "test",
+                                         "output/output.md",
+                                         ".")[1]
+    assert string1Result == "![Image](../test/img/image.png)", "Error"

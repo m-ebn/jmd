@@ -38,10 +38,6 @@ def addFooter(element):
 
 
 def updateImageLinks(element, base_dir, outputPath, jmdFile):
-    print(element)
-    print(base_dir)
-    print(outputPath)
-    print(jmdFile)
     # Get variable without filename for further filepath processing
     outputPathHead = os.path.split(os.path.join(jmdFile, outputPath))[0]
     # Find all image references in a file
@@ -54,8 +50,16 @@ def updateImageLinks(element, base_dir, outputPath, jmdFile):
             2. joing the absolute path to the jmd.py file with the base_Dir with 1. and the image path
             3. normalize the filepath with os.path.normpath
         """
-        normalizedImagePath = os.path.normpath(
-            os.path.join(jmdFile, base_dir, os.path.split(element[3])[0], image[1]))
+        filePath = os.path.split(element[3])[0]
+        if base_dir == filePath:
+            combinedPath = os.path.join(jmdFile, base_dir, image[1])
+        else:
+            combinedPath = os.path.join(
+                jmdFile, base_dir, filePath, image[1])
+        print(base_dir)
+        print(filePath)
+        print(combinedPath)
+        normalizedImagePath = os.path.normpath(combinedPath)
         # Generate a relative path from the image path to the path of the output file
         fixedOutputPath = os.path.relpath(
             normalizedImagePath, outputPathHead)
@@ -288,8 +292,8 @@ class jmd():
         parser.add_argument('-i', '--include_title', type=bool, default=False,
                             help='Include meta data title as first level title (#).')
 
-        parser.add_argument('-h', '--header_offset', type=bool, default=False,
-                            help='Add an additional `#` to titles in order to manipulate final file structure.')
+        # parser.add_argument('-h', '--header_offset', type=bool, default=False,
+        #                     help='Add an additional `#` to titles in order to manipulate final file structure.')
 
         args_list = parser.parse_args()
 
