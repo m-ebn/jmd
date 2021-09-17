@@ -182,17 +182,24 @@ class jmd():
                         except:
                             title = ""
 
+                        ids = ""
                         try:
-                            ids = file_content['parsed_document_id'].split(
-                                ", ")
+                            if type(file_content['parsed_document_id']) != str:
+                                ids = file_content['parsed_document_id']
+                            else:
+                                ids = file_content['parsed_document_id'].split(
+                                    ", ")
                         except:
-                            ids = file_content['parsed_document_id']
+                            pass
 
                         try:
-                            positions = file_content['parsed_document_position'].split(
-                                ", ")
+                            if type(file_content['parsed_document_position']) != str:
+                                positions = file_content['parsed_document_position']
+                            else:
+                                positions = file_content['parsed_document_position'].split(
+                                    ", ")
                         except:
-                            positions = file_content['parsed_document_position']
+                            pass
 
                         if self.document_id in ids:
 
