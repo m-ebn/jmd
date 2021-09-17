@@ -49,9 +49,14 @@ def updateImageLinks(element, base_dir, outputPath, jmdFile):
         JmdPatterns.pattern_image_path, element[1])
     # Get new file reference and update the old one
     for image in imageUrlList:
-        # Create a normalized, relative path between the image and path of the output file
+        """ Create a normalized, relative path between the image and path of the output file
+            1. get path to file withour filename
+            2. joing the absolute path to the jmd.py file with the base_Dir with 1. and the image path
+            3. normalize the filepath with os.path.normpath
+        """
         normalizedImagePath = os.path.normpath(
-            os.path.join(jmdFile, base_dir, image[1]))
+            os.path.join(jmdFile, base_dir, os.path.split(element[3])[0], image[1]))
+        # Generate a relative path from the image path to the path of the output file
         fixedOutputPath = os.path.relpath(
             normalizedImagePath, outputPathHead)
         # Replace the original url with the newly generated url
